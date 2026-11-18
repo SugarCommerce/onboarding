@@ -1,0 +1,92 @@
+{
+  "name": "sugarcommerce/onboarding",
+  "description": "A plugin's first-run setup wizard and the setup checklist that stays until the work is done, described as steps and tasks, with every answer stored where the settings page reads it.",
+  "homepage": "https://github.com/SugarCommerce/onboarding",
+  "type": "library",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "David Sherlock",
+      "homepage": "https://arraypress.com/"
+    }
+  ],
+  "require": {
+    "php": ">=8.3",
+    "sugarcommerce/fields": "dev-main",
+    "sugarcommerce/settings": "dev-main"
+  },
+  "require-dev": {
+    "phpcompatibility/phpcompatibility-wp": "^2.1",
+    "phpunit/phpunit": "^12.0",
+    "squizlabs/php_codesniffer": "^3.13.5",
+    "wp-coding-standards/wpcs": "^3.4"
+  },
+  "suggest": {
+    "sugarcommerce/jobs": "Adds the sync step type, for a wizard that imports data as one of its steps."
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../settings",
+      "options": {
+        "symlink": false
+      }
+    },
+    {
+      "type": "path",
+      "url": "../fields",
+      "options": {
+        "symlink": false
+      }
+    },
+    {
+      "type": "path",
+      "url": "../geo",
+      "options": {
+        "symlink": false
+      }
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "SugarCommerce\\Onboarding\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "SugarCommerce\\Onboarding\\Tests\\": "tests/"
+    },
+    "exclude-from-classmap": [
+      "/tests/bootstrap.php",
+      "/tests/stubs.php",
+      "/tests/kit/"
+    ]
+  },
+  "scripts": {
+    "test": "phpunit",
+    "lint": "phpcs",
+    "format": "phpcbf --standard=phpcs-format.xml.dist",
+    "format:check": "phpcs --standard=phpcs-format.xml.dist",
+    "docs:verify": "php vendor/sugarcommerce/fields/bin/verify-docs.php --calls=Onboarding::register --keys=option README.md"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "support": {
+    "issues": "https://github.com/SugarCommerce/onboarding/issues",
+    "source": "https://github.com/SugarCommerce/onboarding"
+  },
+  "keywords": [
+    "wordpress",
+    "onboarding",
+    "setup-wizard",
+    "checklist",
+    "admin"
+  ]
+}

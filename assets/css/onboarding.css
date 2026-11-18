@@ -1,0 +1,979 @@
+/**
+ * Onboarding wizard.
+ *
+ * The same visual language as the flyout library — a quiet grey surface, the
+ * form on a white card, rounded controls, colour from the admin's own scheme
+ * — so a plugin that uses both looks like one product. The fields are the
+ * kit's; this only sets how they sit on the card.
+ *
+ * Written with logical properties throughout (inline-start, not left), so the
+ * one file serves right-to-left languages with no second sheet.
+ *
+ * A plugin brands it by setting the custom properties below on `.onboarding`,
+ * or through the wizard's `accent`, never by overriding rules.
+ *
+ * @package SugarCommerce\Onboarding
+ */
+
+.onboarding {
+	/*
+	 * The accent follows the user's admin colour scheme: core publishes
+	 * --wp-admin-theme-color and recolours it per scheme, and the first
+	 * screen of a plugin is a poor place to be the one thing on the page that
+	 * ignores it. The hex after it is for a page where core's variables are
+	 * not set.
+	 */
+	--onboarding-accent: var(--wp-admin-theme-color, #2271b1);
+	--onboarding-accent-hover: var(--wp-admin-theme-color-darker-10, #135e96);
+	--onboarding-accent-soft: color-mix(in srgb, var(--onboarding-accent) 10%, #fff);
+	--onboarding-surface: #f6f6f7;
+	--onboarding-card: #fff;
+	--onboarding-card-border: #e3e3e6;
+	--onboarding-card-radius: 12px;
+	--onboarding-control-border: #c4c7cc;
+	--onboarding-control-radius: 8px;
+	--onboarding-text: #1f2124;
+	--onboarding-text-muted: #5c5f66;
+	--onboarding-line: #e3e3e6;
+	--onboarding-success: #008a20;
+	--onboarding-error: #d63638;
+	--onboarding-error-soft: #fcf0f1;
+	--onboarding-focus-width: var(--wp-admin-border-width-focus, 2px);
+	--onboarding-width: 680px;
+	--onboarding-rail-width: 232px;
+	--onboarding-steps: 4; /* Set per wizard, on the list, to its number of steps. */
+
+	box-sizing: border-box;
+	min-height: 100vh;
+	background: var(--onboarding-surface);
+	color: var(--onboarding-text);
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.onboarding *,
+.onboarding *::before,
+.onboarding *::after {
+	box-sizing: border-box;
+}
+
+/* Inside the admin the page is already the surface. */
+.onboarding--admin {
+	min-height: 0;
+	background: transparent;
+}
+
+/* ==========================================================================
+   The takeover
+
+   Focus is the default layout: the admin menu, the toolbar and the footer
+   are taken away, the way Stripe's and Shopify's first-run screens and
+   WooCommerce's own setup do. A first run is a funnel, and twenty menu items
+   beside it are twenty ways out of it. The page is still an admin page — the
+   media modal, the colour picker and every footer script a field needs still
+   load — it is only the chrome that goes.
+
+   The "admin" layout keeps the menu, for a wizard that is one tool among
+   others rather than the first thing anybody sees.
+   ========================================================================== */
+
+body.onboarding-wizard #wpcontent,
+body.onboarding-wizard #wpbody-content {
+	padding: 0;
+}
+
+body.onboarding-wizard #wpfooter,
+body.onboarding-wizard #screen-meta,
+body.onboarding-wizard #screen-meta-links {
+	display: none;
+}
+
+body.onboarding-layout-focus #adminmenumain,
+body.onboarding-layout-focus #wpadminbar {
+	display: none;
+}
+
+body.onboarding-layout-focus #wpcontent,
+body.onboarding-layout-focus #wpfooter {
+	margin-inline-start: 0;
+}
+
+/* Core pads the page for the toolbar — the html element on wide screens,
+   #wpbody on narrow ones — and the toolbar is gone. */
+html.wp-toolbar:has(body.onboarding-layout-focus),
+body.onboarding-layout-focus #wpbody {
+	padding-top: 0;
+}
+
+body.onboarding-layout-focus {
+	/* The surface's own grey, under the card, to the bottom of a short page. */
+	background: #f6f6f7;
+}
+
+/* ==========================================================================
+   The bar
+   ========================================================================== */
+
+.onboarding__bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	min-height: 60px;
+	padding: 10px 24px;
+	background: var(--onboarding-card);
+	border-bottom: 1px solid var(--onboarding-line);
+}
+
+.onboarding--admin .onboarding__bar {
+	background: transparent;
+	border-bottom: 0;
+	padding-top: 20px;
+}
+
+.onboarding__brand {
+	display: flex;
+	align-items: center;
+	min-width: 0;
+}
+
+.onboarding__logo {
+	display: block;
+	max-height: 32px;
+	width: auto;
+}
+
+.onboarding__title {
+	margin: 0;
+	padding: 0;
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--onboarding-text);
+}
+
+.onboarding__exit {
+	flex: none;
+	color: var(--onboarding-text-muted);
+	font-size: 13px;
+	text-decoration: none;
+}
+
+.onboarding__exit:hover {
+	color: var(--onboarding-text);
+	text-decoration: underline;
+}
+
+/* ==========================================================================
+   Layout
+
+   One column by default: the progress above, the card under it, both the
+   same comfortable width and centred, so the eye goes down the page and
+   nowhere else. `'progress' => 'side'` puts the steps in a rail beside the
+   card instead, for a wizard with many steps whose names are worth seeing.
+   ========================================================================== */
+
+.onboarding__layout--top {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 24px;
+	padding: 40px 24px 80px;
+}
+
+.onboarding__layout--top > * {
+	width: 100%;
+	max-width: var(--onboarding-width);
+}
+
+.onboarding__layout--side {
+	display: grid;
+	grid-template-columns: minmax(0, var(--onboarding-rail-width)) minmax(0, var(--onboarding-width));
+	justify-content: center;
+	align-items: start;
+	gap: 40px;
+	padding: 48px 24px 80px;
+}
+
+.onboarding__layout--side:not(:has(> .onboarding__rail)) {
+	grid-template-columns: minmax(0, var(--onboarding-width));
+}
+
+/* ==========================================================================
+   Progress above the card
+
+   A count and the step's name, then one segment per step. A segment is
+   solid when done, half full where you are, hatched when skipped and
+   empty when still to come: the shapes differ, not only the colours. On a
+   wide screen each segment is labelled with its step's name, done ones
+   ticked and linked back; on a narrow one the labels go and the count
+   says where you are.
+   ========================================================================== */
+
+.onboarding__progress .onboarding__count {
+	margin: 0;
+	color: var(--onboarding-text-muted);
+	font-size: 13px;
+	font-weight: 500;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+.onboarding__count-number {
+	color: var(--onboarding-text);
+	font-weight: 600;
+}
+
+.onboarding__segments {
+	display: grid;
+	grid-template-columns: repeat(var(--onboarding-steps), minmax(0, 1fr));
+	gap: 6px;
+	margin: 10px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.onboarding__segment {
+	min-width: 0;
+	margin: 0;
+
+	/* So a label can tell how much room its segment has: see below. */
+	container-type: inline-size;
+}
+
+.onboarding__segment-link {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	color: var(--onboarding-text-muted);
+	font-size: 12px;
+	line-height: 1.35;
+	text-decoration: none;
+}
+
+.onboarding__segment-bar {
+	display: block;
+	height: 6px;
+	border-radius: 999px;
+	background: var(--onboarding-line);
+}
+
+.onboarding__segment--done .onboarding__segment-bar {
+	background: var(--onboarding-accent);
+}
+
+.onboarding__segment.is-current .onboarding__segment-bar {
+	background: linear-gradient(to right, var(--onboarding-accent) 50%, var(--onboarding-line) 50%);
+}
+
+[dir="rtl"] .onboarding__segment.is-current .onboarding__segment-bar {
+	background: linear-gradient(to left, var(--onboarding-accent) 50%, var(--onboarding-line) 50%);
+}
+
+.onboarding__segment--skipped .onboarding__segment-bar {
+	background: repeating-linear-gradient(135deg, var(--onboarding-control-border) 0 3px, var(--onboarding-line) 3px 6px);
+}
+
+/* One line, cut short rather than broken mid-word. */
+.onboarding__segment-label {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.onboarding__segment-label .sugarcommerce-icon {
+	width: 14px;
+	height: 14px;
+	margin-inline-end: 2px;
+	color: var(--onboarding-accent);
+	font-size: 14px;
+	line-height: 1.35;
+	vertical-align: top;
+}
+
+/* A tick as heavy as the font's was, and on the line of the text. */
+.onboarding__segment-label svg.sugarcommerce-icon {
+	margin-top: 2px;
+	stroke-width: 2.5;
+}
+
+.onboarding__segment.is-current .onboarding__segment-link {
+	color: var(--onboarding-text);
+	font-weight: 600;
+}
+
+.onboarding__segment .onboarding__step-status {
+	margin-inline-start: 0;
+	font-size: 11px;
+}
+
+/* A segment too narrow for a name — a wizard of many steps — keeps its
+   bar and drops the label, which is still read out from the list. The
+   count above says where you are. */
+@container (max-width: 96px) {
+
+	.onboarding__segment-label,
+	.onboarding__segment .onboarding__step-status {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+
+	/* The bar alone is a small thing to press, so the link reaches
+	   past it, above and below, without moving anything. */
+	.onboarding__segment-link {
+		gap: 0;
+		margin-block: -8px;
+		padding-block: 8px;
+	}
+}
+
+.onboarding a.onboarding__segment-link:hover .onboarding__segment-label {
+	color: var(--onboarding-text);
+	text-decoration: underline;
+}
+
+.onboarding a.onboarding__segment-link:focus {
+	box-shadow: none;
+}
+
+.onboarding a.onboarding__segment-link:focus-visible {
+	border-radius: 4px;
+	outline: var(--onboarding-focus-width) solid var(--onboarding-accent);
+	outline-offset: 3px;
+}
+
+/* ==========================================================================
+   Progress beside the card (`'progress' => 'side'`)
+
+   An ordered list of places, one of which you are at. Done is a filled
+   marker with a tick, skipped a dashed one with a dash and the word, the
+   current step an accent ring, and what is ahead a plain ring.
+   ========================================================================== */
+
+.onboarding__rail {
+	position: sticky;
+	top: 32px;
+}
+
+.onboarding__count {
+	margin: 0 0 8px;
+	color: var(--onboarding-text-muted);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.onboarding__meter {
+	height: 4px;
+	margin-bottom: 20px;
+	overflow: hidden;
+	border-radius: 999px;
+	background: var(--onboarding-line);
+}
+
+.onboarding__meter > span {
+	display: block;
+	height: 100%;
+	border-radius: inherit;
+	background: var(--onboarding-accent);
+	transition: width 0.3s ease;
+}
+
+.onboarding__steps {
+	display: grid;
+	gap: 2px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.onboarding__step {
+	margin: 0;
+}
+
+.onboarding__step-link {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 7px 10px;
+	border-radius: var(--onboarding-control-radius);
+	color: var(--onboarding-text-muted);
+	font-size: 13px;
+	text-decoration: none;
+}
+
+.onboarding a.onboarding__step-link:hover {
+	background: #ebebed;
+	color: var(--onboarding-text);
+}
+
+.onboarding a.onboarding__step-link:focus {
+	box-shadow: none;
+}
+
+.onboarding a.onboarding__step-link:focus-visible {
+	outline: var(--onboarding-focus-width) solid var(--onboarding-accent);
+	outline-offset: 1px;
+}
+
+.onboarding__step.is-current .onboarding__step-link {
+	background: var(--onboarding-card);
+	box-shadow: 0 0 0 1px var(--onboarding-card-border);
+	color: var(--onboarding-text);
+	font-weight: 600;
+}
+
+.onboarding__marker {
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	border: 1.5px solid var(--onboarding-control-border);
+	border-radius: 50%;
+	background: var(--onboarding-card);
+	font-size: 11px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+.onboarding__marker .sugarcommerce-icon {
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+}
+
+.onboarding__marker svg.sugarcommerce-icon {
+	stroke-width: 2.5;
+}
+
+.onboarding__step.is-current .onboarding__marker {
+	border-color: var(--onboarding-accent);
+	color: var(--onboarding-accent);
+}
+
+.onboarding__step--done .onboarding__marker,
+.onboarding__step--done.is-current .onboarding__marker {
+	border-color: var(--onboarding-accent);
+	background: var(--onboarding-accent);
+	color: #fff;
+}
+
+.onboarding__step--skipped .onboarding__marker {
+	border-style: dashed;
+}
+
+.onboarding__step-title {
+	min-width: 0;
+}
+
+.onboarding__step-status {
+	margin-inline-start: auto;
+	color: var(--onboarding-text-muted);
+	font-size: 11px;
+	font-weight: 400;
+}
+
+/* ==========================================================================
+   The card
+   ========================================================================== */
+
+.onboarding__card {
+	padding: 32px 36px;
+	border: 1px solid var(--onboarding-card-border);
+	border-radius: var(--onboarding-card-radius);
+	background: var(--onboarding-card);
+	box-shadow: 0 1px 2px rgba(17, 18, 20, 0.04);
+}
+
+.onboarding__back {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	margin-block: -8px 16px;
+	margin-inline-start: -6px;
+	padding-block: 4px;
+	padding-inline: 2px 8px;
+	border-radius: 6px;
+	color: var(--onboarding-text-muted);
+	font-size: 13px;
+	text-decoration: none;
+}
+
+.onboarding__back:hover {
+	color: var(--onboarding-text);
+	background: var(--onboarding-surface);
+}
+
+.onboarding__back .sugarcommerce-icon {
+	width: 18px;
+	height: 18px;
+	font-size: 18px;
+}
+
+.onboarding__back svg.sugarcommerce-icon {
+	stroke-width: 2.5;
+}
+
+[dir="rtl"] .onboarding__back .sugarcommerce-icon {
+	transform: scaleX(-1);
+}
+
+.onboarding__header {
+	margin-bottom: 24px;
+}
+
+.onboarding__heading {
+	margin: 0;
+	padding: 0;
+	color: var(--onboarding-text);
+	font-size: 22px;
+	font-weight: 600;
+	line-height: 1.3;
+	letter-spacing: -0.01em;
+	text-wrap: balance;
+}
+
+/* Focus is put here by the script; it is a landmark for a screen reader,
+   not something to draw a ring around for everybody else. */
+.onboarding__heading:focus {
+	outline: none;
+}
+
+.onboarding__description {
+	max-width: 56ch;
+	margin: 6px 0 0;
+	color: var(--onboarding-text-muted);
+	font-size: 14px;
+}
+
+/* ==========================================================================
+   Errors
+   ========================================================================== */
+
+.onboarding__errors {
+	margin: 0 0 24px;
+	padding: 14px 16px;
+	border: 1px solid color-mix(in srgb, var(--onboarding-error) 35%, #fff);
+	border-inline-start: 4px solid var(--onboarding-error);
+	border-radius: var(--onboarding-control-radius);
+	background: var(--onboarding-error-soft);
+}
+
+/* Focus lands here when a step comes back refused. A ring a shade lighter
+   than the border, so the box does not read as drawn twice. */
+.onboarding__errors:focus {
+	outline: var(--onboarding-focus-width) solid color-mix(in srgb, var(--onboarding-error) 30%, transparent);
+	outline-offset: 3px;
+}
+
+.onboarding__errors-title {
+	margin: 0 0 6px;
+	font-weight: 600;
+}
+
+.onboarding__errors ul {
+	margin: 0;
+	padding-inline-start: 18px;
+	list-style: disc;
+}
+
+.onboarding__errors li {
+	margin: 2px 0;
+}
+
+.onboarding__errors a {
+	color: var(--onboarding-error);
+}
+
+/* ==========================================================================
+   Content
+   ========================================================================== */
+
+.onboarding__content > * + * {
+	margin-top: 20px;
+}
+
+.onboarding__image {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	border-radius: var(--onboarding-control-radius);
+}
+
+.onboarding__prose > :first-child {
+	margin-top: 0;
+}
+
+.onboarding__prose > :last-child {
+	margin-bottom: 0;
+}
+
+.onboarding__prose p {
+	font-size: 14px;
+}
+
+.onboarding__items {
+	display: grid;
+	gap: 14px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.onboarding__item {
+	display: flex;
+	gap: 12px;
+	margin: 0;
+}
+
+.onboarding__item-icon {
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: var(--onboarding-control-radius);
+	background: var(--onboarding-accent-soft);
+	color: var(--onboarding-accent);
+}
+
+.onboarding__item-text strong {
+	display: block;
+	font-weight: 600;
+}
+
+.onboarding__item-text span {
+	color: var(--onboarding-text-muted);
+}
+
+.onboarding__links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.onboarding__links .onboarding__external {
+	width: 16px;
+	height: 16px;
+	margin-inline-start: 4px;
+	vertical-align: -3px;
+}
+
+/* ==========================================================================
+   Fields
+
+   Spacing and controls only. Labels, descriptions, errors and every control's
+   behaviour are the kit's.
+   ========================================================================== */
+
+.onboarding__fields {
+	display: grid;
+	gap: 20px;
+}
+
+.onboarding__fields > * {
+	margin: 0;
+}
+
+.onboarding__fields > [hidden] {
+	display: none;
+}
+
+.onboarding .field-kit__field > label,
+.onboarding .field-kit__legend {
+	margin-bottom: 6px;
+	color: var(--onboarding-text);
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.onboarding .description,
+.onboarding p.description {
+	margin: 6px 0 0;
+	color: var(--onboarding-text-muted);
+	font-size: 13px;
+	font-style: normal;
+	line-height: 1.5;
+}
+
+.onboarding__fields input[type="text"],
+.onboarding__fields input[type="email"],
+.onboarding__fields input[type="url"],
+.onboarding__fields input[type="tel"],
+.onboarding__fields input[type="number"],
+.onboarding__fields input[type="password"],
+.onboarding__fields input[type="search"],
+.onboarding__fields input[type="date"],
+.onboarding__fields input[type="time"],
+.onboarding__fields input[type="datetime-local"],
+.onboarding__fields select,
+.onboarding__fields textarea {
+	min-height: 40px;
+	padding: 6px 12px;
+	border: 1px solid var(--onboarding-control-border);
+	border-radius: var(--onboarding-control-radius);
+	background-color: #fff;
+	box-shadow: 0 1px 0 rgba(17, 18, 20, 0.04);
+	color: var(--onboarding-text);
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.onboarding__fields select {
+	padding-inline-end: 32px;
+}
+
+.onboarding__fields input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]),
+.onboarding__fields select,
+.onboarding__fields textarea {
+	width: 100%;
+	max-width: 100%;
+}
+
+.onboarding__fields input:focus,
+.onboarding__fields select:focus,
+.onboarding__fields textarea:focus {
+	border-color: var(--onboarding-accent);
+	box-shadow: 0 0 0 1px var(--onboarding-accent);
+	outline: none;
+}
+
+.onboarding__fields [aria-invalid="true"] {
+	border-color: var(--onboarding-error);
+}
+
+.onboarding .field-kit__error {
+	color: var(--onboarding-error);
+}
+
+/* Cards to pick from are cards like the rest of the screen. */
+.onboarding .field-kit__card {
+	border-radius: var(--onboarding-control-radius);
+}
+
+/* ==========================================================================
+   Actions
+
+   Continue first and on the leading edge, where the eye finishes the last
+   field; Skip and Save and finish later quiet beside it, the second pushed
+   to the far end so it is never pressed for Continue.
+   ========================================================================== */
+
+.onboarding__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 16px;
+	margin-top: 32px;
+	padding-top: 24px;
+	border-top: 1px solid var(--onboarding-line);
+}
+
+.onboarding .button {
+	border-radius: var(--onboarding-control-radius);
+}
+
+.onboarding .button-primary,
+.onboarding__actions .onboarding__next {
+	min-height: 40px;
+	padding: 0 20px;
+	border-color: var(--onboarding-accent);
+	background: var(--onboarding-accent);
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 38px;
+}
+
+.onboarding .button-primary:hover,
+.onboarding .button-primary:focus {
+	border-color: var(--onboarding-accent-hover);
+	background: var(--onboarding-accent-hover);
+}
+
+.onboarding .button-secondary {
+	min-height: 40px;
+	padding: 0 16px;
+	line-height: 38px;
+}
+
+.onboarding__quiet {
+	padding: 8px 4px;
+	border: 0;
+	background: none;
+	color: var(--onboarding-text-muted);
+	font: inherit;
+	font-size: 13px;
+	cursor: pointer;
+}
+
+.onboarding__quiet:hover {
+	color: var(--onboarding-text);
+	text-decoration: underline;
+}
+
+.onboarding__quiet:focus-visible,
+.onboarding__exit:focus-visible,
+.onboarding__back:focus-visible {
+	border-radius: 4px;
+	outline: var(--onboarding-focus-width) solid var(--onboarding-accent);
+	outline-offset: 2px;
+	box-shadow: none;
+}
+
+.onboarding__later {
+	margin-inline-start: auto;
+}
+
+.onboarding__form[aria-busy="true"] .onboarding__actions {
+	opacity: 0.6;
+}
+
+/* ==========================================================================
+   The finish screen
+   ========================================================================== */
+
+.onboarding__finish-mark {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	margin-bottom: 16px;
+	border-radius: 50%;
+	background: color-mix(in srgb, var(--onboarding-success) 12%, #fff);
+	color: var(--onboarding-success);
+}
+
+.onboarding__finish-mark .sugarcommerce-icon {
+	width: 28px;
+	height: 28px;
+	font-size: 28px;
+}
+
+/* The font's tick sat inside its box; the outline's fills it. */
+.onboarding__finish-mark svg.sugarcommerce-icon {
+	width: 22px;
+	height: 22px;
+	stroke-width: 2.5;
+}
+
+.onboarding__finish .onboarding-checklist {
+	margin-top: 24px;
+}
+
+.onboarding__confetti {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	pointer-events: none;
+}
+
+/* ==========================================================================
+   Narrower screens
+
+   Below the width that fits the rail beside the card, the rail becomes the
+   count and the bar above the card. The list of step names is what does not
+   fit, and the card already names the step it is on.
+   ========================================================================== */
+
+@media screen and (max-width: 960px) {
+
+	.onboarding__layout--side {
+		grid-template-columns: minmax(0, var(--onboarding-width));
+		gap: 16px;
+		padding: 24px 16px 48px;
+	}
+
+	.onboarding__rail {
+		position: static;
+	}
+
+	.onboarding__steps {
+		display: none;
+	}
+
+	.onboarding__meter {
+		margin-bottom: 0;
+	}
+}
+
+/* Below the width where a step's name fits under its segment, the names
+   go — still read out, from the list — and the count says where you are. */
+@media screen and (max-width: 720px) {
+
+	.onboarding__layout--top {
+		gap: 16px;
+		padding: 20px 16px 48px;
+	}
+
+	.onboarding__segments {
+		gap: 4px;
+	}
+
+	.onboarding__segment-link {
+		gap: 0;
+	}
+
+	.onboarding__segment-label,
+	.onboarding__segment .onboarding__step-status {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+}
+
+@media screen and (max-width: 600px) {
+
+	.onboarding__bar {
+		min-height: 52px;
+		padding: 8px 16px;
+	}
+
+	.onboarding__card {
+		padding: 22px 18px;
+	}
+
+	.onboarding__heading {
+		font-size: 20px;
+	}
+
+	.onboarding__actions {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.onboarding__actions .onboarding__next {
+		width: 100%;
+	}
+
+	.onboarding__later {
+		margin-inline-start: 0;
+	}
+
+	.onboarding__links .button {
+		width: 100%;
+		text-align: center;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.onboarding *,
+	.onboarding *::before,
+	.onboarding *::after {
+		transition: none !important;
+		animation: none !important;
+	}
+}

@@ -1,0 +1,459 @@
+/**
+ * Onboarding checklist card.
+ *
+ * Loaded wherever a plugin draws the card — its dashboard, an empty list, the
+ * WordPress dashboard — so it touches nothing outside `.onboarding-checklist`.
+ * Same visual language as the wizard and the flyout library: a white card
+ * with a light border and a 12px radius, colour from the admin scheme.
+ *
+ * Brand it by setting the custom properties below on the card.
+ *
+ * @package SugarCommerce\Onboarding
+ */
+
+.onboarding-checklist {
+	--onboarding-checklist-accent: var(--wp-admin-theme-color, #2271b1);
+	--onboarding-checklist-card: #fff;
+	--onboarding-checklist-border: #e3e3e6;
+	--onboarding-checklist-radius: 12px;
+	--onboarding-checklist-control-radius: 8px;
+	--onboarding-checklist-text: #1f2124;
+	--onboarding-checklist-muted: #5c5f66;
+	--onboarding-checklist-line: #ebebed;
+	--onboarding-checklist-hover: #f6f6f7;
+	--onboarding-checklist-success: #008a20;
+	--onboarding-checklist-focus-width: var(--wp-admin-border-width-focus, 2px);
+
+	box-sizing: border-box;
+	margin: 0 0 20px;
+	padding: 20px 20px 8px;
+	border: 1px solid var(--onboarding-checklist-border);
+	border-radius: var(--onboarding-checklist-radius);
+	background: var(--onboarding-checklist-card);
+	box-shadow: 0 1px 2px rgba(17, 18, 20, 0.04);
+	color: var(--onboarding-checklist-text);
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.onboarding-checklist *,
+.onboarding-checklist *::before,
+.onboarding-checklist *::after {
+	box-sizing: border-box;
+}
+
+/* Inside a dashboard widget the widget is the card. */
+.onboarding-checklist--widget {
+	margin: -11px -12px -12px;
+	padding: 12px 12px 4px;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+
+.onboarding-checklist__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.onboarding-checklist__title {
+	margin: 0;
+	padding: 0;
+	color: var(--onboarding-checklist-text);
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+.onboarding-checklist__description {
+	margin: 4px 0 0;
+	color: var(--onboarding-checklist-muted);
+}
+
+.onboarding-checklist__dismiss {
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	margin-block-start: -4px;
+	margin-inline-end: -6px;
+	padding: 0;
+	border: 0;
+	border-radius: var(--onboarding-checklist-control-radius);
+	background: none;
+	color: var(--onboarding-checklist-muted);
+	cursor: pointer;
+}
+
+.onboarding-checklist__dismiss .sugarcommerce-icon {
+	width: 20px;
+	height: 20px;
+	font-size: 20px;
+	stroke-width: 2;
+}
+
+.onboarding-checklist__dismiss:hover {
+	background: var(--onboarding-checklist-hover);
+	color: var(--onboarding-checklist-text);
+}
+
+/* ==========================================================================
+   Progress
+   ========================================================================== */
+
+.onboarding-checklist__progress {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+	margin: 14px 0 8px;
+}
+
+.onboarding-checklist__count {
+	color: var(--onboarding-checklist-muted);
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.onboarding-checklist__meter {
+	display: block;
+	flex: 1 1 120px;
+	height: 6px;
+	overflow: hidden;
+	border-radius: 999px;
+	background: var(--onboarding-checklist-line);
+}
+
+.onboarding-checklist__meter-fill {
+	display: block;
+	height: 100%;
+	border-radius: inherit;
+	background: var(--onboarding-checklist-accent);
+	transition: width 0.3s ease;
+}
+
+.onboarding-checklist.is-complete .onboarding-checklist__meter-fill {
+	background: var(--onboarding-checklist-success);
+}
+
+.onboarding-checklist__wizard.button {
+	border-radius: var(--onboarding-checklist-control-radius);
+}
+
+/* ==========================================================================
+   Tasks
+   ========================================================================== */
+
+.onboarding-checklist__tasks {
+	margin: 0 -12px;
+	padding: 0;
+	list-style: none;
+}
+
+.onboarding-checklist__task {
+	margin: 0;
+	border-top: 1px solid var(--onboarding-checklist-line);
+}
+
+.onboarding-checklist__task:first-child {
+	border-top: 0;
+}
+
+.onboarding-checklist__task summary {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 12px;
+	border-radius: var(--onboarding-checklist-control-radius);
+	cursor: pointer;
+	list-style: none;
+	font-weight: 500;
+}
+
+.onboarding-checklist__task summary::-webkit-details-marker {
+	display: none;
+}
+
+.onboarding-checklist__task summary:hover {
+	background: var(--onboarding-checklist-hover);
+}
+
+.onboarding-checklist__task summary:focus-visible,
+.onboarding-checklist__dismiss:focus-visible,
+.onboarding-checklist__mark:focus-visible {
+	outline: var(--onboarding-checklist-focus-width) solid var(--onboarding-checklist-accent);
+	outline-offset: -2px;
+	box-shadow: none;
+}
+
+.onboarding-checklist__task details[open] > summary {
+	font-weight: 600;
+}
+
+.onboarding-checklist__marker {
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	border: 1.5px dashed #a7aaad;
+	border-radius: 50%;
+	color: #fff;
+}
+
+.onboarding-checklist__marker .sugarcommerce-icon {
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+	stroke-width: 2.5;
+}
+
+.onboarding-checklist__task--done .onboarding-checklist__marker {
+	border: 0;
+	background: var(--onboarding-checklist-text);
+}
+
+.onboarding-checklist__task--done .onboarding-checklist__task-title {
+	color: var(--onboarding-checklist-muted);
+}
+
+.onboarding-checklist__optional {
+	margin-inline-start: auto;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: var(--onboarding-checklist-line);
+	color: var(--onboarding-checklist-muted);
+	font-size: 11px;
+	font-weight: 500;
+}
+
+.onboarding-checklist__body {
+	padding-block: 0 14px;
+	padding-inline: 46px 12px;
+}
+
+.onboarding-checklist__body p {
+	margin: 0 0 12px;
+	color: var(--onboarding-checklist-muted);
+}
+
+.onboarding-checklist__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 16px;
+}
+
+.onboarding-checklist__actions .button {
+	border-radius: var(--onboarding-checklist-control-radius);
+}
+
+.onboarding-checklist__actions .onboarding-checklist__external {
+	width: 16px;
+	height: 16px;
+	margin-inline-start: 4px;
+	vertical-align: -3px;
+}
+
+.onboarding-checklist__mark {
+	color: var(--onboarding-checklist-muted);
+}
+
+/* ==========================================================================
+   Compact
+   ==========================================================================
+
+   One row about the height of a WordPress notice, for a screen people open
+   every day: title and count, the next task with its button, then the
+   controls. A grid rather than a flex row so that at phone width the same
+   four pieces can be rearranged into short lines without a second copy of
+   any of them in the markup. */
+
+/* A notice's own margins, so under a screen's title it keeps the rhythm of
+   the notices around it. */
+.onboarding-checklist--compact {
+	margin: 5px 0 15px;
+	padding: 12px 16px;
+}
+
+.onboarding-checklist__row {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto auto;
+	grid-template-areas: "summary next controls dismiss";
+	align-items: center;
+	gap: 8px 20px;
+}
+
+.onboarding-checklist__summary {
+	grid-area: summary;
+	min-width: 0;
+}
+
+.onboarding-checklist--compact .onboarding-checklist__title {
+	font-size: 14px;
+}
+
+.onboarding-checklist--compact .onboarding-checklist__progress {
+	flex-wrap: nowrap;
+	gap: 10px;
+	margin: 2px 0 0;
+}
+
+.onboarding-checklist--compact .onboarding-checklist__meter {
+	flex: 0 0 96px;
+	height: 4px;
+}
+
+.onboarding-checklist__next {
+	display: flex;
+	grid-area: next;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 14px;
+	min-width: 0;
+	padding-inline-start: 20px;
+	border-inline-start: 1px solid var(--onboarding-checklist-line);
+}
+
+.onboarding-checklist__next-text {
+	min-width: 0;
+	margin: 0;
+}
+
+.onboarding-checklist__next-label {
+	color: var(--onboarding-checklist-muted);
+}
+
+.onboarding-checklist__next-title {
+	font-weight: 500;
+}
+
+.onboarding-checklist__next .onboarding-checklist__actions {
+	flex-wrap: nowrap;
+}
+
+.onboarding-checklist__controls {
+	display: flex;
+	grid-area: controls;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px 16px;
+}
+
+.onboarding-checklist--compact .onboarding-checklist__dismiss {
+	grid-area: dismiss;
+	margin-block-start: 0;
+}
+
+.onboarding-checklist__toggle.button-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	color: var(--onboarding-checklist-accent);
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.onboarding-checklist__toggle .sugarcommerce-icon {
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+	stroke-width: 2.5;
+	transition: transform 0.15s ease;
+}
+
+.onboarding-checklist__toggle[aria-expanded="true"] .sugarcommerce-icon {
+	transform: rotate(180deg);
+}
+
+.onboarding-checklist__toggle:focus-visible {
+	border-radius: 2px;
+	outline: var(--onboarding-checklist-focus-width) solid var(--onboarding-checklist-accent);
+	outline-offset: 2px;
+	box-shadow: none;
+}
+
+.onboarding-checklist__panel {
+	margin-block-start: 12px;
+	padding-block-start: 10px;
+	border-top: 1px solid var(--onboarding-checklist-line);
+}
+
+.onboarding-checklist__panel[hidden] {
+	display: none;
+}
+
+.onboarding-checklist__panel > .onboarding-checklist__description {
+	margin: 0 0 6px;
+}
+
+/* Phone width, at core's own breakpoint: the title and count beside the
+   dismiss button, the next task under them, then the controls. */
+@media screen and (max-width: 782px) {
+
+	.onboarding-checklist__row {
+		grid-template-columns: minmax(0, 1fr) auto;
+		grid-template-areas:
+			"summary dismiss"
+			"next next"
+			"controls controls";
+		gap: 10px 12px;
+	}
+
+	.onboarding-checklist__next {
+		padding-inline-start: 0;
+		border-inline-start: 0;
+	}
+
+	.onboarding-checklist__next .onboarding-checklist__actions {
+		flex-wrap: wrap;
+	}
+
+	.onboarding-checklist__controls {
+		justify-content: flex-start;
+	}
+
+	.onboarding-checklist--compact .onboarding-checklist__meter {
+		flex: 1 1 auto;
+	}
+}
+
+/* ==========================================================================
+   Dismissed
+   ========================================================================== */
+
+.onboarding-checklist--dismissed {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 16px;
+}
+
+.onboarding-checklist--dismissed p:not(.screen-reader-text) {
+	margin: 0;
+	color: var(--onboarding-checklist-muted);
+}
+
+.onboarding-checklist[aria-busy="true"] {
+	opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.onboarding-checklist__meter-fill,
+	.onboarding-checklist__toggle .sugarcommerce-icon {
+		transition: none;
+	}
+}

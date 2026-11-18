@@ -707,8 +707,11 @@ final class Wizard {
 		$parent = (string) ( $_parent_pages[ $slug ] ?? $this->config['parent_slug'] );
 
 		// A page whose parent is itself a plugin page is reached through
-		// admin.php, because the parent has no file of its own.
-		$base = ( '' === $parent || isset( $_parent_pages[ $parent ] ) ) ? 'admin.php' : $parent;
+		// admin.php, because the parent has no file of its own. Told by the
+		// slug as well as by the menu: off an admin screen -- admin-post.php,
+		// REST, cron -- the menu was never built, and the parent's slug went
+		// into the address as if it were a file.
+		$base = ( '' === $parent || isset( $_parent_pages[ $parent ] ) || ! str_contains( $parent, '.php' ) ) ? 'admin.php' : $parent;
 
 		$query = [ 'page' => $slug ];
 

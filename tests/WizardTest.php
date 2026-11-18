@@ -636,6 +636,19 @@ final class WizardTest extends OnboardingTestCase {
 	}
 
 	/**
+	 * Under a plugin's page when the menu has not been built -- from
+	 * admin-post.php, REST or cron -- still through admin.php, not through a
+	 * file named after the parent's slug.
+	 */
+	public function test_a_page_under_a_plugin_page_uses_admin_php_without_the_menu(): void {
+		$GLOBALS['_parent_pages'] = [];
+
+		$wizard = $this->wizard( [ 'parent_slug' => 'myplugin-home' ] );
+
+		$this->assertSame( 'https://example.test/wp-admin/admin.php?page=myplugin&step=store', $wizard->url( 'store' ) );
+	}
+
+	/**
 	 * The way out defaults to the dashboard.
 	 */
 	public function test_the_exit(): void {

@@ -10,6 +10,9 @@
  * and only then tells the server, so the list is remembered for next time.
  * Nothing is swapped: the focus stays on the button that was pressed.
  *
+ * Requests go through `wp.apiFetch`, which renews an expired nonce and
+ * tries again, so a card left open for a day still works.
+ *
  * Bound on the document rather than on each card, so a card drawn after the
  * page loaded — a dashboard widget moved, a card swapped in by this script —
  * works the same.
@@ -74,7 +77,7 @@
 			label.textContent = open ? button.dataset.hide : button.dataset.show;
 		}
 
-		window.fetch( card.dataset.endpoint + '/expanded', {
+		request( card.dataset.endpoint + '/expanded', {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: {
@@ -108,7 +111,7 @@
 		body.context = card.dataset.context || 'card';
 		body.layout = card.dataset.layout || 'full';
 
-		window.fetch( card.dataset.endpoint + path, {
+		request( card.dataset.endpoint + path, {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: {
@@ -130,6 +133,64 @@
 			card.removeAttribute( 'aria-busy' );
 			announce( card, error.message || card.dataset.failed || 'That did not work.' );
 		} );
+	}
+
+	/**
+	 * Send a request to the REST API, the way `fetch` would.
+	 *
+	 * Through `wp.apiFetch` when the page has it, because the nonce printed
+	 * with the card runs out after a day: a dashboard left open overnight
+	 * then gets a 403 from every button. apiFetch notices the stale nonce,
+	 * asks for a fresh one and sends the request again. Its answer is handed
+	 * back shaped like a fetch Response (`ok`, `status`, `json()`), so the
+	 * callers read it the same either way.
+	 *
+	 * @param {string} url  The route's full URL.
+	 * @param {Object} init As fetch's: `method`, `headers`, `body`.
+	 *
+	 * @return {Promise<Object>} A Response, or something shaped like one.
+	 */
+	function request( url, init ) {
+		var api = window.wp && window.wp.apiFetch;
+
+		if ( 'function' !== typeof api ) {
+			return window.fetch( url, init );
+		}
+
+		return api( {
+			url: url,
+			method: init.method || 'GET',
+			headers: init.headers || {},
+			body: init.body,
+			parse: true
+		} ).then( function ( json ) {
+			return answer( true, 200, json );
+		}, function ( error ) {
+			if ( ! error || 'object' !== typeof error || 'AbortError' === error.name || 'fetch_error' === error.code || 'offline_error' === error.code ) {
+				throw new Error( ( error && error.message ) || '' );
+			}
+
+			return answer( false, ( error.data && error.data.status ) || 400, error );
+		} );
+	}
+
+	/**
+	 * An apiFetch answer, shaped like a fetch Response.
+	 *
+	 * @param {boolean} ok     Whether it succeeded.
+	 * @param {number}  status The HTTP status.
+	 * @param {*}       json   The decoded body.
+	 *
+	 * @return {Object}
+	 */
+	function answer( ok, status, json ) {
+		return {
+			ok: ok,
+			status: status,
+			json: function () {
+				return Promise.resolve( json );
+			}
+		};
 	}
 
 	/**

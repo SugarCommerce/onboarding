@@ -648,7 +648,10 @@ own.
 
 Under `sugarcommerce-onboarding/v1` (or `{prefix}-sugarcommerce-onboarding/v1`
 in a prefixed build). Each
-needs a signed-in user with the capability, and a REST nonce.
+needs a signed-in user with the capability, and a REST nonce. The card's
+script sends them through `wp.apiFetch` (a dependency of the script), which
+renews an expired nonce and tries again, so a dashboard left open overnight
+still works.
 
 | Route | Method | Does |
 |---|---|---|

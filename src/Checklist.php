@@ -616,7 +616,7 @@ final class Checklist {
 	 */
 	public function enqueue(): void {
 		Assets::style( Runtime::handle( 'checklist' ), 'css/checklist.css' );
-		Assets::script( Runtime::handle( 'checklist' ), 'js/checklist.js' );
+		Assets::script( Runtime::handle( 'checklist' ), 'js/checklist.js', [ 'wp-api-fetch' ] );
 	}
 
 	/**

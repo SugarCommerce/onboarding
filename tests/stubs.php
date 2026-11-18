@@ -65,6 +65,7 @@ function ob_reset_globals(): void {
 	$GLOBALS['ob_removed_menu']  = [];
 	$GLOBALS['ob_styles']        = [];
 	$GLOBALS['ob_scripts']       = [];
+	$GLOBALS['ob_script_deps']   = [];
 	$GLOBALS['ob_caps']          = [ 'manage_options' ];
 	$GLOBALS['ob_nonce_ok']      = true;
 	$GLOBALS['ob_nonce_checked'] = null;
@@ -352,7 +353,8 @@ if ( ! function_exists( 'wp_enqueue_style' ) ) {
 
 if ( ! function_exists( 'wp_enqueue_script' ) ) {
 	function wp_enqueue_script( $handle, $src = '', $deps = [], $ver = false, $args = [] ) {
-		$GLOBALS['ob_scripts'][ $handle ] = $src;
+		$GLOBALS['ob_scripts'][ $handle ]      = $src;
+		$GLOBALS['ob_script_deps'][ $handle ] = $deps;
 	}
 }
 

@@ -40,13 +40,14 @@ final class Assets {
 	/**
 	 * Enqueue a script from the assets folder, in the footer.
 	 *
-	 * @param string $handle Its handle.
-	 * @param string $file   Its path in the assets folder.
+	 * @param string   $handle Its handle.
+	 * @param string   $file   Its path in the assets folder.
+	 * @param string[] $deps   The scripts it needs first.
 	 *
 	 * @return void
 	 */
-	public static function script( string $handle, string $file ): void {
-		wp_enqueue_script( $handle, self::url( $file ), [], self::version( $file ), true );
+	public static function script( string $handle, string $file, array $deps = [] ): void {
+		wp_enqueue_script( $handle, self::url( $file ), $deps, self::version( $file ), true );
 	}
 
 	/**

@@ -788,6 +788,7 @@ final class ChecklistTest extends OnboardingTestCase {
 
 		$this->assertSame( [ Runtime::handle( 'checklist' ) ], array_keys( $GLOBALS['ob_styles'] ) );
 		$this->assertSame( [ Runtime::handle( 'checklist' ) ], array_keys( $GLOBALS['ob_scripts'] ) );
+		$this->assertContains( 'wp-api-fetch', $GLOBALS['ob_script_deps'][ Runtime::handle( 'checklist' ) ] );
 	}
 
 	/* ---------------------------------------------------------------------

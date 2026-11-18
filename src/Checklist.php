@@ -12,8 +12,8 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\Onboarding;
 
-use SugarCommerce\Onboarding\Utils\Assets;
 use SugarCommerce\Onboarding\Utils\Runtime;
+use SugarCommerce\Plugin\Assets;
 
 /**
  * A setup guide that outlives the wizard.
@@ -615,8 +615,8 @@ final class Checklist {
 	 * @return void
 	 */
 	public function enqueue(): void {
-		Assets::style( Runtime::handle( 'checklist' ), 'css/checklist.css' );
-		Assets::script( Runtime::handle( 'checklist' ), 'js/checklist.js', [ 'wp-api-fetch' ] );
+		Assets::enqueue_style( Runtime::handle( 'checklist' ), __FILE__, 'css/checklist.css' );
+		Assets::enqueue_script( Runtime::handle( 'checklist' ), __FILE__, 'js/checklist.js', [ 'wp-api-fetch' ] );
 	}
 
 	/**

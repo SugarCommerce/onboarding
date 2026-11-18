@@ -84,7 +84,7 @@ final class NoSharedRuntimeKeysTest extends TestCase {
 	 * Script and style handles decide whose asset loads.
 	 */
 	public function test_asset_handles_are_not_literals(): void {
-		$this->assertNoLiteral( "/(?:wp_(?:enqueue|register)_(?:script|style)|Assets::(?:style|script))\(\s*'([^']+)'/", 'Asset handles' );
+		$this->assertNoLiteral( "/(?:wp_(?:enqueue|register)_(?:script|style)|Assets::(?:enqueue|register)_(?:style|script))\(\s*'([^']+)'/", 'Asset handles' );
 	}
 
 	/**

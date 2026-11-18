@@ -716,6 +716,7 @@ user meta key, CSS class and data attribute keeps its name.
 | hooks `arraypress_onboarding_*_{id}` | `sugarcommerce_onboarding_*_{id}`, the same eighteen with the same arguments |
 | REST `onboarding/v1`, `{prefix}-onboarding/v1` | `sugarcommerce-onboarding/v1`, `{prefix}-sugarcommerce-onboarding/v1` |
 | handles `onboarding`, `onboarding-checklist` | `sugarcommerce-onboarding`, `sugarcommerce-onboarding-checklist` (`Runtime::handle()`) |
+| `Utils\Assets` (its own copy of the asset-URL arithmetic) | `SugarCommerce\Plugin\Assets`, the one asset-URL helper of these packages |
 | activation transient `onboarding_{id}_redirect` | `sugarcommerce_onboarding_{id}_redirect` |
 | `arraypress/wp-field-kit`, `arraypress/wp-composer-assets` | `sugarcommerce/fields`; the assets are loaded by the package itself |
 | step `type => 'sync'` on `wp-inline-sync`, events `inline-sync:*` | on `sugarcommerce/jobs`' `Sync`, events `sugar-sync:*`; Continue waits only when the sync exists |

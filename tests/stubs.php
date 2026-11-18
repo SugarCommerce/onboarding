@@ -347,25 +347,31 @@ if ( ! function_exists( 'esc_url' ) ) {
 
 if ( ! function_exists( 'wp_enqueue_style' ) ) {
 	function wp_enqueue_style( $handle, $src = '', $deps = [], $ver = false, $media = 'all' ) {
-		$GLOBALS['ob_styles'][ $handle ] = $src;
+		$GLOBALS['ob_styles'][ $handle ] = '' !== $src ? $src : ( $GLOBALS['ob_registered'][ $handle ]['src'] ?? '' );
 	}
 }
 
 if ( ! function_exists( 'wp_enqueue_script' ) ) {
 	function wp_enqueue_script( $handle, $src = '', $deps = [], $ver = false, $args = [] ) {
-		$GLOBALS['ob_scripts'][ $handle ]      = $src;
-		$GLOBALS['ob_script_deps'][ $handle ] = $deps;
+		$registered = $GLOBALS['ob_registered'][ $handle ] ?? [];
+
+		$GLOBALS['ob_scripts'][ $handle ]     = '' !== $src ? $src : ( $registered['src'] ?? '' );
+		$GLOBALS['ob_script_deps'][ $handle ] = '' !== $src ? $deps : ( $registered['deps'] ?? [] );
 	}
 }
 
 if ( ! function_exists( 'wp_register_style' ) ) {
 	function wp_register_style( $handle, $src = '', $deps = [], $ver = false, $media = 'all' ) {
+		$GLOBALS['ob_registered'][ $handle ] = [ 'src' => $src, 'deps' => $deps ];
+
 		return true;
 	}
 }
 
 if ( ! function_exists( 'wp_register_script' ) ) {
 	function wp_register_script( $handle, $src = '', $deps = [], $ver = false, $args = [] ) {
+		$GLOBALS['ob_registered'][ $handle ] = [ 'src' => $src, 'deps' => $deps ];
+
 		return true;
 	}
 }

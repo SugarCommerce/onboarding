@@ -10,7 +10,7 @@ declare( strict_types=1 );
 namespace SugarCommerce\Onboarding\Tests;
 
 use SugarCommerce\Onboarding\Onboarding;
-use SugarCommerce\Onboarding\Utils\Assets;
+use SugarCommerce\Plugin\Assets;
 use SugarCommerce\Settings\Page;
 
 /**
@@ -209,9 +209,10 @@ final class SettingsTest extends OnboardingTestCase {
 	 * The stylesheet's address is worked out from where the copy sits.
 	 */
 	public function test_an_assets_address_follows_the_copy(): void {
-		$this->assertStringEndsWith( '/sugarcommerce/onboarding/assets/css/onboarding.css', Assets::url( 'css/onboarding.css' ) );
-		$this->assertStringStartsWith( content_url(), Assets::url( 'css/onboarding.css' ) );
-		$this->assertMatchesRegularExpression( '/^\d+$/', Assets::version( 'css/onboarding.css' ) );
-		$this->assertSame( '1', Assets::version( 'css/nothing.css' ) );
+		$wizard = dirname( __DIR__ ) . '/src/Wizard.php';
+
+		$this->assertStringEndsWith( '/sugarcommerce/onboarding/assets/css/onboarding.css', (string) Assets::url( $wizard, 'css/onboarding.css' ) );
+		$this->assertStringStartsWith( content_url(), (string) Assets::url( $wizard, 'css/onboarding.css' ) );
+		$this->assertNull( Assets::url( $wizard, 'css/nothing.css' ) );
 	}
 }

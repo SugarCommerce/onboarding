@@ -21,8 +21,8 @@ use SugarCommerce\Fields\FieldSet;
 use SugarCommerce\Onboarding\Support\Draft;
 use SugarCommerce\Onboarding\Support\State;
 use SugarCommerce\Onboarding\Support\Storage;
-use SugarCommerce\Onboarding\Utils\Assets;
 use SugarCommerce\Onboarding\Utils\Runtime;
+use SugarCommerce\Plugin\Assets;
 use SugarCommerce\Settings\Page;
 use WP_Error;
 
@@ -1391,8 +1391,8 @@ final class Wizard {
 			( new FieldAssets() )->enqueue( $set->dependencies() );
 		}
 
-		Assets::style( Runtime::handle(), 'css/onboarding.css' );
-		Assets::script( Runtime::handle(), 'js/onboarding.js' );
+		Assets::enqueue_style( Runtime::handle(), __FILE__, 'css/onboarding.css' );
+		Assets::enqueue_script( Runtime::handle(), __FILE__, 'js/onboarding.js' );
 
 		$checklist = false === $this->config['finish'] ? '' : (string) $this->config['finish']['checklist'];
 

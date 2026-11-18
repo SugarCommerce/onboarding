@@ -13,6 +13,7 @@
   "require": {
     "php": ">=8.3",
     "sugarcommerce/fields": "dev-main",
+    "sugarcommerce/plugin": "dev-main",
     "sugarcommerce/settings": "dev-main"
   },
   "require-dev": {
@@ -25,6 +26,13 @@
     "sugarcommerce/jobs": "Adds the sync step type, for a wizard that imports data as one of its steps."
   },
   "repositories": [
+    {
+      "type": "path",
+      "url": "../plugin",
+      "options": {
+        "symlink": false
+      }
+    },
     {
       "type": "path",
       "url": "../settings",

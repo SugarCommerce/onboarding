@@ -51,4 +51,21 @@ final class RuntimeTest extends TestCase {
 		$this->assertSame( 'my-plugin-2-sugarcommerce-onboarding', Runtime::prefix_for( 'My_Plugin__2\SugarCommerce\Onboarding\Utils' ) );
 		$this->assertSame( 'sugarcommerce-onboarding', Runtime::prefix_for( '' ) );
 	}
+
+	/**
+	 * A plugin of the family prefixes with a namespace that also starts
+	 * "SugarCommerce", and its build is still its own.
+	 */
+	public function test_a_family_plugin_build_is_not_taken_for_the_library(): void {
+		$playground = Runtime::prefix_for( 'SugarCommerce\Playground\Vendor\SugarCommerce\Onboarding\Utils' );
+
+		$this->assertSame( 'sugarcommerce-playground-vendor-sugarcommerce-onboarding', $playground );
+		$this->assertNotSame(
+			$playground,
+			Runtime::prefix_for( 'SugarCommerce\Kitchen\Vendor\SugarCommerce\Onboarding\Utils' ),
+			'Two plugins of the family share a name.'
+		);
+		$this->assertSame( 'sugarcart-sugarcommerce-onboarding', Runtime::prefix_for( 'SugarCart\Vendor\SugarCommerce\Onboarding\Utils' ), 'A plugin outside the family keeps its name.' );
+		$this->assertSame( 'sugarcommerce-onboarding', Runtime::prefix_for( '\SugarCommerce\Onboarding\Utils\\' ) );
+	}
 }

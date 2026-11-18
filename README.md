@@ -535,7 +535,10 @@ the page, the input names, the nonces, the progress, the answers, the
 activation flag, the dismissals — is named from its own id. Assets load only on
 the wizard's own screen. In a Strauss-prefixed build the script handles, the
 REST namespace and the transients carry the plugin's prefix as well, so two
-bundled copies never answer for each other.
+bundled copies never answer for each other. A prefix that itself starts
+`SugarCommerce\` keeps all its segments -- `SugarCommerce\Playground\Vendor\`
+gives `sugarcommerce-playground-vendor-sugarcommerce-onboarding/v1` -- so a
+plugin of the family is never taken for an unprefixed copy.
 
 ## Layout
 

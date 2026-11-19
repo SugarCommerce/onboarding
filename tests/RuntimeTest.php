@@ -68,4 +68,22 @@ final class RuntimeTest extends TestCase {
 		$this->assertSame( 'sugarcart-sugarcommerce-onboarding', Runtime::prefix_for( 'SugarCart\Vendor\SugarCommerce\Onboarding\Utils' ), 'A plugin outside the family keeps its name.' );
 		$this->assertSame( 'sugarcommerce-onboarding', Runtime::prefix_for( '\SugarCommerce\Onboarding\Utils\\' ) );
 	}
+
+	/**
+	 * A plugin that bundles the packages into its own Lib namespace is named
+	 * for every segment before Lib, so two plugins of one vendor are two
+	 * builds; a one-segment Lib, a prefix and an unprefixed copy keep their
+	 * names.
+	 */
+	public function test_a_plugins_own_lib_namespace_names_the_build(): void {
+		$this->assertSame( 'arraypress-edd-fraudfilter-sugarcommerce-onboarding', Runtime::prefix_for( 'ArrayPress\\EDD\\FraudFilter\\Lib\\Onboarding\\Utils' ) );
+		$this->assertNotSame(
+			Runtime::prefix_for( 'ArrayPress\\EDD\\FraudFilter\\Lib\\Onboarding\\Utils' ),
+			Runtime::prefix_for( 'ArrayPress\\EDD\\SalePrices\\Lib\\Onboarding\\Utils' ),
+			'Two plugins of one vendor share a name.'
+		);
+		$this->assertSame( 'playground-sugarcommerce-onboarding', Runtime::prefix_for( 'Playground\\Lib\\Onboarding\\Utils' ), 'A one-segment Lib changed its name.' );
+		$this->assertSame( 'sugarcart-sugarcommerce-onboarding', Runtime::prefix_for( 'SugarCart\\Vendor\\SugarCommerce\\Onboarding\\Utils' ), 'A prefix changed its name.' );
+		$this->assertSame( 'sugarcommerce-onboarding', Runtime::prefix_for( 'SugarCommerce\\Onboarding\\Utils' ), 'The unprefixed copy changed its name.' );
+	}
 }

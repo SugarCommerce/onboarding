@@ -66,6 +66,7 @@ function ob_reset_globals(): void {
 	$GLOBALS['ob_styles']        = [];
 	$GLOBALS['ob_scripts']       = [];
 	$GLOBALS['ob_script_deps']   = [];
+	$GLOBALS['ob_script_translations'] = [];
 	$GLOBALS['ob_caps']          = [ 'manage_options' ];
 	$GLOBALS['ob_nonce_ok']      = true;
 	$GLOBALS['ob_nonce_checked'] = null;
@@ -371,6 +372,14 @@ if ( ! function_exists( 'wp_register_style' ) ) {
 if ( ! function_exists( 'wp_register_script' ) ) {
 	function wp_register_script( $handle, $src = '', $deps = [], $ver = false, $args = [] ) {
 		$GLOBALS['ob_registered'][ $handle ] = [ 'src' => $src, 'deps' => $deps ];
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'wp_set_script_translations' ) ) {
+	function wp_set_script_translations( $handle, $domain = 'default', $path = '' ) {
+		$GLOBALS['ob_script_translations'][ $handle ] = $domain;
 
 		return true;
 	}

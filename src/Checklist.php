@@ -616,7 +616,12 @@ final class Checklist {
 	 */
 	public function enqueue(): void {
 		Assets::enqueue_style( Runtime::handle( 'checklist' ), __FILE__, 'css/checklist.css' );
-		Assets::enqueue_script( Runtime::handle( 'checklist' ), __FILE__, 'js/checklist.js', [ 'wp-api-fetch' ] );
+
+		// Built from src/js into assets/build, in the footer. Its manifest
+		// names what it imports -- wp-api-fetch, which renews a nonce that
+		// ran out while the card was open, and wp-i18n -- and the helper puts
+		// its words in the library's text domain.
+		Assets::enqueue_built_script( Runtime::handle( 'checklist' ), __FILE__, 'checklist' );
 	}
 
 	/**

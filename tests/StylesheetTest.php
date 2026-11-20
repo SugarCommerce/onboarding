@@ -187,10 +187,15 @@ final class StylesheetTest extends TestCase {
 	}
 
 	/**
-	 * The scripts fetch nothing from anywhere else either.
+	 * The scripts fetch nothing from anywhere else either: their sources,
+	 * and the build that ships.
 	 */
 	public function test_the_scripts_make_no_external_requests(): void {
-		foreach ( glob( dirname( __DIR__ ) . '/assets/js/*.js' ) as $path ) {
+		$paths = array_merge( glob( dirname( __DIR__ ) . '/src/js/{,*/}*.js', GLOB_BRACE ), glob( dirname( __DIR__ ) . '/assets/build/*.js' ) );
+
+		$this->assertGreaterThanOrEqual( 10, count( $paths ) );
+
+		foreach ( $paths as $path ) {
 			$this->assertDoesNotMatchRegularExpression( '#https?://#', (string) file_get_contents( $path ), basename( $path ) );
 		}
 	}

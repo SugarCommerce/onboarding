@@ -1395,7 +1395,10 @@ final class Wizard {
 		}
 
 		Assets::enqueue_style( Runtime::handle(), __FILE__, 'css/onboarding.css' );
-		Assets::enqueue_script( Runtime::handle(), __FILE__, 'js/onboarding.js' );
+
+		// Built from src/js into assets/build, in the footer. Its manifest
+		// names what it imports: wp-dom-ready.
+		Assets::enqueue_built_script( Runtime::handle(), __FILE__, 'onboarding' );
 
 		$checklist = false === $this->config['finish'] ? '' : (string) $this->config['finish']['checklist'];
 

@@ -76,11 +76,37 @@ final class TranslationTest extends TestCase {
 	 * A message a script writes itself is a message no translator can reach.
 	 * The checklist script reads its failure message from the card, which
 	 * the server translated; its last-resort string is only for a card drawn
-	 * without one.
+	 * without one, and is the server's own words, through wp.i18n.
 	 */
 	public function test_the_checklist_script_reads_its_message_from_the_page(): void {
-		$script = (string) file_get_contents( dirname( __DIR__ ) . '/assets/js/checklist.js' );
+		$config = (string) file_get_contents( dirname( __DIR__ ) . '/src/js/lib/config.js' );
+		$card   = (string) file_get_contents( dirname( __DIR__ ) . '/src/js/checklist/card.js' );
 
-		$this->assertStringContainsString( 'card.dataset.failed', $script );
+		$this->assertStringContainsString( 'card.dataset.failed', $config );
+		$this->assertStringContainsString( "__( 'That did not work. Please try again.', 'sugarcommerce' )", $card );
+		$this->assertStringContainsString( "esc_attr__( 'That did not work. Please try again.', 'sugarcommerce' )", (string) file_get_contents( dirname( __DIR__ ) . '/src/ChecklistView.php' ) );
+	}
+
+	/**
+	 * Every string the scripts translate themselves is in the library's
+	 * domain too: the build is registered with wp_set_script_translations()
+	 * under it, and a string in another is English on every site.
+	 */
+	public function test_every_script_string_is_in_the_librarys_domain(): void {
+		$calls = 0;
+
+		foreach ( glob( dirname( __DIR__ ) . '/src/js/{,*/}*.js', GLOB_BRACE ) as $path ) {
+			preg_match_all( '/\b(?:__|_x|_n|_nx)\(\s*(?:\'(?:[^\'\\\\]|\\\\.)*\'\s*,\s*){1,3}\'([^\']*)\'\s*\)/', (string) file_get_contents( $path ), $matches );
+
+			// Every call is read: one the pattern missed would go unchecked.
+			$this->assertSame( preg_match_all( '/\b(?:__|_x|_n|_nx)\(/', (string) file_get_contents( $path ) ), count( $matches[1] ), basename( $path ) );
+
+			foreach ( $matches[1] as $domain ) {
+				++$calls;
+				$this->assertSame( 'sugarcommerce', $domain, basename( $path ) );
+			}
+		}
+
+		$this->assertGreaterThan( 0, $calls, 'The scan found no strings, so it is not reading the scripts.' );
 	}
 }

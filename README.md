@@ -101,6 +101,7 @@ into the same values rather than a second copy of them.
 * [REST routes](#rest-routes)
 * [Accessibility](#accessibility)
 * [Translation](#translation)
+* [The scripts](#the-scripts)
 * [Moving from arraypress/wp-*](#moving-from-arraypresswp-)
 
 ## Steps
@@ -652,9 +653,9 @@ own.
 Under `sugarcommerce-onboarding/v1` (or `{prefix}-sugarcommerce-onboarding/v1`
 in a prefixed build). Each
 needs a signed-in user with the capability, and a REST nonce. The card's
-script sends them through `wp.apiFetch` (a dependency of the script), which
-renews an expired nonce and tries again, so a dashboard left open overnight
-still works.
+script sends them through `@wordpress/api-fetch` (which the build imports),
+which renews an expired nonce and tries again, so a dashboard left open
+overnight still works.
 
 | Route | Method | Does |
 |---|---|---|
@@ -690,6 +691,60 @@ Buttons in steps run through the field engine's own action route.
 Every string the library shows is in the `sugarcommerce` text domain. A plugin
 that wants its own wording, or its own translations, passes `labels` to the
 wizard and checklist and writes its own titles.
+
+## The scripts
+
+Plain JavaScript in ES modules (`src/js`), each with one job, built by
+`@wordpress/scripts` into `assets/build` -- two files, each with an
+`.asset.php` naming the WordPress scripts it imports and a version that
+changes with its contents. Both load with
+`SugarCommerce\Plugin\Assets::enqueue_built_script()`, in the footer:
+
+| Entry | Loaded by | Handle | Imports |
+|---|---|---|---|
+| `onboarding.js` | `Wizard::enqueue()`, on the wizard's own page | `Runtime::handle()` | `wp-dom-ready` |
+| `checklist.js` | `Checklist::enqueue()`, wherever a card is drawn | `Runtime::handle( 'checklist' )` | `wp-api-fetch`, `wp-i18n` |
+
+No jQuery; neither ever had any. Everything is an enhancement: every step
+submits, skips, goes back and finishes with no script at all.
+
+| Module | Its job |
+|---|---|
+| `onboarding.js` | The wizard's entry: once the page is ready, wires the step's form and the finish screen |
+| `onboarding/focus` | The focus on the step's heading when it opens, or on the errors when it came back refused; an error's link focusing its field |
+| `onboarding/answers` | Every answer on the step added to a button's `fieldkit:action-payload`, under its field key, where the handler did not already have it |
+| `onboarding/submit` | One submission at a time: busy at once, the buttons disabled a tick later (a disabled submitter is left out of the form data), freed when the browser's Back restores the page |
+| `onboarding/sync` | The import step's Continue held until `sugar-sync:complete` (or let past on `sugar-sync:error`), the button that ran it hidden |
+| `onboarding/confetti` | The finish screen's confetti, unless the browser asked for less movement |
+| `checklist.js` | The card's entry: its buttons bound on the document at once, through the imported apiFetch |
+| `checklist/card` | Hide and bring back, tick and untick, Show All; the card swapped for the markup the server answers with, the focus kept somewhere sensible |
+| `checklist/request` | Every request, JSON through apiFetch with the card's nonce; a failure as the words to say |
+| `checklist/announce` | The card's live region, emptied and written a frame later so a message twice is said twice |
+| `lib/config` | The one reader of what PHP printed: the form's and the card's `data-*` |
+
+What other code may rely on is unchanged: both handles; every class and
+`data-*` attribute the screens print (`.onboarding__form` with `data-fields`
+and `data-sync`, `.onboarding__finish[data-celebrate]`, the card's
+`data-endpoint`, `data-nonce`, `data-context`, `data-layout`, `data-failed`
+and its `data-checklist-*` buttons) and what the scripts set (`aria-busy`,
+`aria-expanded`, `is-expanded`, `.onboarding__confetti`); the events listened
+to -- fields' `fieldkit:action-payload` on the form and jobs'
+`sugar-sync:complete` and `sugar-sync:error` on the document, all native
+CustomEvents; and every request body (`dismissed`, `done`, `expanded`, with
+`context` and `layout`). The scripts set no global and fire no events.
+
+```bash
+npm ci
+npm run build      # assets/build, committed
+npm run start      # rebuild on change
+npm run test:js    # Vitest, in jsdom (composer test:js runs it too)
+npm run lint:js
+```
+
+The tests run each module on the markup the screens draw, and the card's
+buttons against a stand-in for its routes. The build's files are what ship,
+with the sources beside them. CI builds again and fails when the result
+differs from what was committed.
 
 ## Moving from arraypress/wp-*
 

@@ -13,9 +13,9 @@ declare( strict_types=1 );
 namespace SugarCommerce\Onboarding\Traits\Screen;
 
 use SugarCommerce\Fields\FieldSet;
-use SugarCommerce\Jobs\Sync;
 use SugarCommerce\Onboarding\Utils\Icon;
 use SugarCommerce\Onboarding\Wizard;
+use SugarCommerce\Plugin\Build;
 
 /**
  * A step's own content: its prose, lists, links and the import step's wait.
@@ -189,7 +189,7 @@ trait Content {
 	 * @return void
 	 */
 	private function sync( array $step ): void {
-		$sync = '' === (string) $step['sync_id'] || ! class_exists( Sync::class ) ? null : Sync::get( (string) $step['sync_id'] );
+		$sync = self::find_sync( (string) $step['sync_id'] );
 
 		if ( null === $sync ) {
 			return;
@@ -213,9 +213,24 @@ trait Content {
 	 * @return bool
 	 */
 	private function waits_for_sync( array $step ): bool {
-		return 'sync' === (string) $step['type']
-			&& '' !== (string) $step['sync_id']
-			&& class_exists( Sync::class )
-			&& null !== Sync::get( (string) $step['sync_id'] );
+		return 'sync' === (string) $step['type'] && null !== self::find_sync( (string) $step['sync_id'] );
+	}
+
+	/**
+	 * The sync registered under an id, from sugarcommerce/jobs in this build.
+	 *
+	 * The package is suggested, not required, so it is never imported: a
+	 * plugin that bundles onboarding without it would otherwise reach
+	 * SugarCart's unprefixed copy and its syncs. Build::sibling() names the
+	 * copy beside this one.
+	 *
+	 * @param string $id The sync's id.
+	 *
+	 * @return object|null The Sync, or null when there is none.
+	 */
+	private static function find_sync( string $id ): ?object {
+		$sync = Build::sibling( __NAMESPACE__, 4, 'Jobs\\Sync' );
+
+		return '' === $id || ! class_exists( $sync ) ? null : $sync::get( $id );
 	}
 }

@@ -192,6 +192,38 @@ final class SettingsTest extends OnboardingTestCase {
 	}
 
 	/**
+	 * An import step whose sync this build's jobs package has waits for it,
+	 * and draws its button.
+	 *
+	 * Found through Build::sibling(): a jobs copy in another build -- one
+	 * named under another plugin's prefix -- is never asked.
+	 */
+	public function test_a_sync_step_with_a_sync_to_run_waits_and_draws_it(): void {
+		require_once __DIR__ . '/fixtures/JobsSync.php';
+
+		new \SugarCommerce\Jobs\Sync( 'orders' );
+
+		$wizard = Onboarding::register(
+			'importer',
+			[
+				'steps' => [
+					'import' => [
+						'title'   => 'Import',
+						'type'    => 'sync',
+						'sync_id' => 'orders',
+					],
+					'done'   => [ 'title' => 'Done' ],
+				],
+			]
+		);
+
+		$html = $this->render( $wizard );
+
+		$this->assertStringContainsString( 'data-sync="1"', $html );
+		$this->assertStringContainsString( 'class="stub-sync" data-id="orders"', $html );
+	}
+
+	/**
 	 * The card printed where it is wanted.
 	 */
 	public function test_a_checklist_prints_its_card(): void {

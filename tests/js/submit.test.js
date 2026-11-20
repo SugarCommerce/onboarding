@@ -5,7 +5,7 @@
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { oneAtATime } from '../../src/js/onboarding/submit';
+import { oneAtATime } from '../../assets/js/onboarding/submit';
 import { loadStep } from './support/wizard';
 
 const submit = ( form ) => {

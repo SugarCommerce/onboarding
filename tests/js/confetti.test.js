@@ -11,7 +11,7 @@ import {
 	DURATION,
 	opacity,
 	scatter,
-} from '../../src/js/onboarding/confetti';
+} from '../../assets/js/onboarding/confetti';
 import { loadFinish, loadStep } from './support/wizard';
 
 /**

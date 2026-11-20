@@ -71,6 +71,7 @@ final class Draft implements Context {
 	 *
 	 * @return mixed
 	 */
+	#[\Override]
 	public function read( int|string $object_id, Field $field ): mixed {
 		$key = $field->key();
 
@@ -94,6 +95,7 @@ final class Draft implements Context {
 	 *
 	 * @return void
 	 */
+	#[\Override]
 	public function write( int|string $object_id, Field $field, mixed $value ): void {
 		unset( $this->deleted[ $field->key() ] );
 
@@ -108,6 +110,7 @@ final class Draft implements Context {
 	 *
 	 * @return void
 	 */
+	#[\Override]
 	public function delete( int|string $object_id, Field $field ): void {
 		unset( $this->written[ $field->key() ] );
 

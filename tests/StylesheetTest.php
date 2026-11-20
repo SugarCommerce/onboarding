@@ -191,7 +191,7 @@ final class StylesheetTest extends TestCase {
 	 * and the build that ships.
 	 */
 	public function test_the_scripts_make_no_external_requests(): void {
-		$paths = array_merge( glob( dirname( __DIR__ ) . '/src/js/{,*/}*.js', GLOB_BRACE ), glob( dirname( __DIR__ ) . '/assets/build/*.js' ) );
+		$paths = array_merge( glob( dirname( __DIR__ ) . '/assets/js/{,*/}*.js', GLOB_BRACE ), glob( dirname( __DIR__ ) . '/assets/build/*.js' ) );
 
 		$this->assertGreaterThanOrEqual( 10, count( $paths ) );
 

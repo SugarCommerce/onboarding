@@ -4,7 +4,7 @@
 
 import { describe, expect, test, vi } from 'vitest';
 
-import { focusOnOpen } from '../../src/js/onboarding/focus';
+import { focusOnOpen } from '../../assets/js/onboarding/focus';
 import { loadFinish, loadStep } from './support/wizard';
 
 const click = ( element ) => {

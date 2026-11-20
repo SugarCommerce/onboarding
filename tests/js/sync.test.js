@@ -5,7 +5,7 @@
 
 import { describe, expect, test } from 'vitest';
 
-import { waitForSync } from '../../src/js/onboarding/sync';
+import { waitForSync } from '../../assets/js/onboarding/sync';
 import { loadStep } from './support/wizard';
 
 /**

@@ -5,11 +5,11 @@
   "description": "The setup wizard's and the checklist card's scripts -- where the focus lands, a step's answers sent with a button, one submission at a time, the import step's wait, the confetti, and the card's buttons -- built to assets/build with @wordpress/scripts.",
   "license": "GPL-2.0-or-later",
   "scripts": {
-    "build": "wp-scripts build onboarding=./src/js/onboarding.js checklist=./src/js/checklist.js --output-path=assets/build",
-    "start": "wp-scripts start onboarding=./src/js/onboarding.js checklist=./src/js/checklist.js --output-path=assets/build",
+    "build": "wp-scripts build onboarding=./assets/js/onboarding.js checklist=./assets/js/checklist.js --output-path=assets/build",
+    "start": "wp-scripts start onboarding=./assets/js/onboarding.js checklist=./assets/js/checklist.js --output-path=assets/build",
     "test:js": "wp-scripts test-unit-js",
-    "lint:js": "wp-scripts lint-js src/js tests/js",
-    "format:js": "wp-scripts format src/js tests/js"
+    "lint:js": "wp-scripts lint-js assets/js tests/js",
+    "format:js": "wp-scripts format assets/js tests/js"
   },
   "devDependencies": {
     "@wordpress/api-fetch": "^8.1.0",

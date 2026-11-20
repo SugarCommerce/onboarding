@@ -12,8 +12,8 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\Onboarding;
 
-use SugarCommerce\Onboarding\Utils\Runtime;
-use SugarCommerce\Plugin\Assets;
+use SugarCommerce\Onboarding\Traits\Checklist\Visibility;
+use SugarCommerce\Onboarding\Traits\Checklist\Display;
 
 /**
  * A setup guide that outlives the wizard.
@@ -33,6 +33,9 @@ use SugarCommerce\Plugin\Assets;
  * take it away from another who has not finished reading it.
  */
 final class Checklist {
+
+	use Visibility;
+	use Display;
 
 	/**
 	 * The checklist's identifier.
@@ -442,208 +445,11 @@ final class Checklist {
 	 * Dismissal
 	 * ------------------------------------------------------------------ */
 
-	/**
-	 * Whether a person has hidden the card.
-	 *
-	 * @param int $user_id The person. The current one by default.
-	 *
-	 * @return bool
-	 */
-	public function is_dismissed( int $user_id = 0 ): bool {
-		$user_id = 0 === $user_id ? get_current_user_id() : $user_id;
-
-		return $user_id > 0 && (bool) get_user_meta( $user_id, $this->dismissal_key(), true );
-	}
-
-	/**
-	 * Hide the card for a person, or bring it back.
-	 *
-	 * @param bool $dismissed Whether to hide it.
-	 * @param int  $user_id   The person. The current one by default.
-	 *
-	 * @return bool False when there is nobody to hide it for, or it cannot be dismissed.
-	 */
-	public function dismiss( bool $dismissed = true, int $user_id = 0 ): bool {
-		$user_id = 0 === $user_id ? get_current_user_id() : $user_id;
-
-		if ( $user_id <= 0 || ( $dismissed && ! $this->config['dismissible'] ) ) {
-			return false;
-		}
-
-		if ( $dismissed ) {
-			update_user_meta( $user_id, $this->dismissal_key(), time() );
-		} else {
-			delete_user_meta( $user_id, $this->dismissal_key() );
-		}
-
-		/**
-		 * Fires when a person hides the card or brings it back.
-		 *
-		 * @param bool      $dismissed Whether it is now hidden.
-		 * @param int       $user_id   The person.
-		 * @param Checklist $checklist The checklist.
-		 *
-		 * @since 1.0.0
-		 */
-		do_action( "sugarcommerce_onboarding_checklist_dismissed_{$this->id}", $dismissed, $user_id, $this );
-
-		return true;
-	}
-
-	/**
-	 * The user meta key holding a dismissal.
-	 *
-	 * @return string
-	 */
-	public function dismissal_key(): string {
-		return str_replace( '-', '_', sanitize_key( $this->id ) ) . '_checklist_dismissed';
-	}
-
 	/* ---------------------------------------------------------------------
 	 * The compact card's list
 	 * ------------------------------------------------------------------ */
 
-	/**
-	 * Whether a person keeps the compact card's full list open.
-	 *
-	 * Remembered rather than reset on each visit: the compact card sits on a
-	 * screen somebody opens many times a day, and a person who wants the
-	 * whole list in view should not have to ask for it every time.
-	 *
-	 * @param int $user_id The person. The current one by default.
-	 *
-	 * @return bool
-	 */
-	public function is_expanded( int $user_id = 0 ): bool {
-		$user_id = 0 === $user_id ? get_current_user_id() : $user_id;
-
-		return $user_id > 0 && (bool) get_user_meta( $user_id, $this->expanded_key(), true );
-	}
-
-	/**
-	 * Open or close the compact card's full list for a person.
-	 *
-	 * @param bool $expanded Whether to keep it open.
-	 * @param int  $user_id  The person. The current one by default.
-	 *
-	 * @return bool False when there is nobody to remember it for.
-	 */
-	public function expand( bool $expanded = true, int $user_id = 0 ): bool {
-		$user_id = 0 === $user_id ? get_current_user_id() : $user_id;
-
-		if ( $user_id <= 0 ) {
-			return false;
-		}
-
-		// Closed is the default, so closing forgets rather than stores a no.
-		if ( $expanded ) {
-			update_user_meta( $user_id, $this->expanded_key(), 1 );
-		} else {
-			delete_user_meta( $user_id, $this->expanded_key() );
-		}
-
-		return true;
-	}
-
-	/**
-	 * The user meta key holding whether the full list is kept open.
-	 *
-	 * @return string
-	 */
-	public function expanded_key(): string {
-		return str_replace( '-', '_', sanitize_key( $this->id ) ) . '_checklist_expanded';
-	}
-
-	/**
-	 * Whether the card should be drawn for the current person at all.
-	 *
-	 * @return bool
-	 */
-	public function is_visible(): bool {
-		if ( ! $this->is_permitted() || [] === $this->tasks() ) {
-			return false;
-		}
-
-		if ( $this->config['dismissible'] && $this->is_dismissed() ) {
-			return false;
-		}
-
-		return ! ( $this->config['hide_when_complete'] && $this->is_complete() );
-	}
-
 	/* ---------------------------------------------------------------------
 	 * Drawing
 	 * ------------------------------------------------------------------ */
-
-	/**
-	 * The card's markup, or nothing when it is not for this person.
-	 *
-	 * @param array<string, mixed> $args `context`: "card" (default) or "widget",
-	 *                                   which leaves the title to the widget's own.
-	 *                                   `layout`: "full" (default), every task
-	 *                                   listed; or "compact", one row with the
-	 *                                   next task and the rest behind Show All.
-	 *
-	 * @return string
-	 */
-	public function html( array $args = [] ): string {
-		if ( ! $this->is_visible() ) {
-			return '';
-		}
-
-		return ( new ChecklistView( $this ) )->render( $args );
-	}
-
-	/**
-	 * Print the card, or nothing when it is not for this person.
-	 *
-	 * @param array<string, mixed> $args As html().
-	 *
-	 * @return void
-	 */
-	public function render( array $args = [] ): void {
-		echo $this->html( $args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped as it is built.
-	}
-
-	/**
-	 * Load the card's stylesheet and script.
-	 *
-	 * Call it from `admin_enqueue_scripts` on the screens that draw the card,
-	 * so the styles are in the head. Drawing the card also asks, which is in
-	 * time for the script and late for the styles.
-	 *
-	 * @return void
-	 */
-	public function enqueue(): void {
-		Assets::enqueue_style( Runtime::handle( 'checklist' ), __FILE__, 'css/checklist.css' );
-
-		// Built from src/js into assets/build, in the footer. Its manifest
-		// names what it imports -- wp-api-fetch, which renews a nonce that
-		// ran out while the card was open, and wp-i18n -- and the helper puts
-		// its words in the library's text domain.
-		Assets::enqueue_built_script( Runtime::handle( 'checklist' ), __FILE__, 'checklist' );
-	}
-
-	/**
-	 * Put the card on the dashboard, if it asked to be.
-	 *
-	 * @return void
-	 */
-	public function register_widget(): void {
-		$widget = $this->config['dashboard_widget'];
-
-		if ( false === $widget || ! $this->is_visible() ) {
-			return;
-		}
-
-		$this->enqueue();
-
-		wp_add_dashboard_widget(
-			str_replace( '-', '_', sanitize_key( $this->id ) ) . '_checklist',
-			esc_html( is_string( $widget ) && '' !== $widget ? $widget : (string) $this->config['title'] ),
-			function (): void {
-				echo $this->html( [ 'context' => 'widget' ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped as it is built.
-			}
-		);
-	}
 }

@@ -5,7 +5,7 @@
 
 import { describe, expect, test, vi } from 'vitest';
 
-import { createPost } from '../../src/js/checklist/request';
+import { createPost } from '../../assets/js/checklist/request';
 
 const URL = 'https://example.test/wp-json/x/v1/checklists/guide/dismiss';
 

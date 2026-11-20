@@ -32,7 +32,7 @@ describe( 'the wizard', () => {
 		const root = loadStep( { errors: true } );
 		const form = root.querySelector( 'form' );
 
-		await import( '../../src/js/onboarding.js' );
+		await import( '../../assets/js/onboarding.js' );
 
 		expect( typeof ready.run ).toBe( 'function' );
 		expect( document.activeElement ).toBe( document.body );
@@ -67,7 +67,7 @@ describe( 'the wizard', () => {
 	test( 'holds Continue on an import step', async () => {
 		const form = loadStep( { sync: true } ).querySelector( 'form' );
 
-		await import( '../../src/js/onboarding.js' );
+		await import( '../../assets/js/onboarding.js' );
 		ready.run();
 
 		expect( form.querySelector( '.onboarding__next' ).disabled ).toBe(
@@ -91,7 +91,7 @@ describe( 'the wizard', () => {
 		window.HTMLCanvasElement.prototype.getContext = () => ( {} );
 		loadFinish();
 
-		await import( '../../src/js/onboarding.js' );
+		await import( '../../assets/js/onboarding.js' );
 		ready.run();
 
 		expect(
@@ -104,7 +104,7 @@ describe( 'the wizard', () => {
 	test( 'does nothing on a page with no wizard', async () => {
 		document.body.innerHTML = '<form class="onboarding__form"></form>';
 
-		await import( '../../src/js/onboarding.js' );
+		await import( '../../assets/js/onboarding.js' );
 
 		expect( () => ready.run() ).not.toThrow();
 	} );
@@ -114,7 +114,7 @@ describe( 'the checklist', () => {
 	test( 'binds the document at once and posts through the imported apiFetch', async () => {
 		apiFetch.mockResolvedValue( { expanded: true } );
 
-		await import( '../../src/js/checklist.js' );
+		await import( '../../assets/js/checklist.js' );
 
 		// Drawn after the script ran: still answered.
 		load( compactCard() );

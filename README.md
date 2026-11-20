@@ -102,7 +102,8 @@ into the same values rather than a second copy of them.
 * [Accessibility](#accessibility)
 * [Translation](#translation)
 * [The scripts](#the-scripts)
-* [Moving from arraypress/wp-*](#moving-from-arraypresswp-)
+* [Security](#security)
+* [Package layout](#package-layout)
 
 ## Steps
 
@@ -694,7 +695,7 @@ wizard and checklist and writes its own titles.
 
 ## The scripts
 
-Plain JavaScript in ES modules (`src/js`), each with one job, built by
+Plain JavaScript in ES modules (`assets/js`), each with one job, built by
 `@wordpress/scripts` into `assets/build` -- two files, each with an
 `.asset.php` naming the WordPress scripts it imports and a version that
 changes with its contents. Both load with
@@ -746,42 +747,34 @@ buttons against a stand-in for its routes. The build's files are what ship,
 with the sources beside them. CI builds again and fails when the result
 differs from what was committed.
 
-## Moving from arraypress/wp-*
+## Security
 
-From `arraypress/wp-register-onboarding` (`ArrayPress\RegisterOnboarding`).
-The global functions are gone -- a global function is the one thing Strauss
-cannot prefix -- and each is a method. Every configuration key, option,
-user meta key, CSS class and data attribute keeps its name.
+* Submitting a step you may not: each step's form checks its own nonce and
+  the wizard's capability, and only a step that applies and can be reached
+  is taken; a skip is honoured only on a step that allows it.
+* Saving what a step does not ask: only the step's declared fields are read,
+  each sanitized by its own type, and a draft holds nothing else.
+* The REST routes: each needs a signed-in user the wizard or checklist
+  permits, core's `wp_rest` nonce for a browser, and a known task or a listed
+  context and layout; dismissing and expanding are kept per user.
+* Redirects elsewhere: every redirect is `wp_safe_redirect()`.
+* Script in the copy: every string drawn is escaped, prose through
+  `wp_kses_post()`, and the card's script inserts only markup its own route
+  drew.
 
-| Old | New |
-|---|---|
-| `ArrayPress\RegisterOnboarding\*` | `SugarCommerce\Onboarding\*` |
-| `register_onboarding( $id, $config )` | `Onboarding::register( $id, $config )` |
-| `get_onboarding( $id )` | `Onboarding::get( $id )` |
-| `get_onboarding_url( $id, $step )` | `Onboarding::get( $id )?->url( $step )` |
-| `get_onboarding_progress( $id )` | `Onboarding::get( $id )?->progress()` |
-| `is_onboarding_completed( $id )` | `Onboarding::get( $id )?->is_completed()` |
-| `reset_onboarding( $id )` | `Onboarding::get( $id )?->reset()` |
-| `onboarding_redirect_after_activation( $id )` | `Onboarding::redirect_after_activation( $id )` |
-| `unregister_onboarding( $id )` | `Onboarding::unregister( $id )` |
-| `register_onboarding_checklist( $id, $config )` | `Onboarding::register_checklist( $id, $config )` |
-| `get_onboarding_checklist( $id )` | `Onboarding::checklist( $id )` |
-| `render_onboarding_checklist( $id, $args )` | `Onboarding::checklist( $id )?->render( $args )` |
-| `enqueue_onboarding_checklist( $id )` | `Onboarding::checklist( $id )?->enqueue()` |
-| `get_onboarding_checklist_status( $id )` | `Onboarding::checklist( $id )?->status()` |
-| `is_onboarding_checklist_complete( $id )` | `Onboarding::checklist( $id )?->is_complete()` |
-| `unregister_onboarding_checklist( $id )` | `Onboarding::unregister_checklist( $id )` |
-| hooks `arraypress_onboarding_*_{id}` | `sugarcommerce_onboarding_*_{id}`, the same eighteen with the same arguments |
-| REST `onboarding/v1`, `{prefix}-onboarding/v1` | `sugarcommerce-onboarding/v1`, `{prefix}-sugarcommerce-onboarding/v1` |
-| handles `onboarding`, `onboarding-checklist` | `sugarcommerce-onboarding`, `sugarcommerce-onboarding-checklist` (`Runtime::handle()`) |
-| `Utils\Assets` (its own copy of the asset-URL arithmetic) | `SugarCommerce\Plugin\Assets`, the one asset-URL helper of these packages |
-| activation transient `onboarding_{id}_redirect` | `sugarcommerce_onboarding_{id}_redirect` |
-| `arraypress/wp-field-kit`, `arraypress/wp-composer-assets` | `sugarcommerce/fields`; the assets are loaded by the package itself |
-| step `type => 'sync'` on `wp-inline-sync`, events `inline-sync:*` | on `sugarcommerce/jobs`' `Sync`, events `sugar-sync:*`; Continue waits only when the sync exists |
-| icon class `arraypress-icon` | `sugarcommerce-icon` |
-| text domain `arraypress` | `sugarcommerce` |
-| options `{id}_onboarding`, `{id}_checklist`; user meta `{id}_checklist_dismissed`, `{id}_checklist_expanded` | unchanged |
-| — | `'settings' => $page_id`: a settings page's fields by key, stored through its reader; `Checklist::render()` |
+## Package layout
+
+* `src/Onboarding.php`: the entry points. `src/Wizard.php`, slim, with its
+  jobs in `src/Traits/Wizard/` (configuration, steps, fields, submission,
+  the admin page).
+* `src/Screen.php`: drawing a wizard, with `src/Traits/Screen/` (the
+  progress bar or rail, a step's content).
+* `src/Checklist.php` and `src/ChecklistView.php`: the setup checklist and
+  its card, with `src/Traits/Checklist/` (who sees it, drawing it).
+* `src/Rest/` (the routes), `src/Support/` (state, drafts, storage),
+  `src/Utils/` (icons, the runtime's names).
+* `assets/js/`: the scripts' sources, built to `assets/build/`;
+  `assets/css/`: the styles.
 
 ## Requirements
 

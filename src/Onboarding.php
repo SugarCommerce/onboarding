@@ -50,7 +50,7 @@ final class Onboarding {
 	/**
 	 * The input naming the wizard a submission belongs to.
 	 */
-	public const INPUT = 'onboarding_wizard';
+	public const string INPUT = 'onboarding_wizard';
 
 	/**
 	 * Register a wizard.

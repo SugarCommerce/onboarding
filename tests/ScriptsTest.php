@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 use SugarCommerce\Plugin\Assets;
 
 /**
- * The scripts are built from src/js into assets/build, and the build is
+ * The scripts are built from assets/js into assets/build, and the build is
  * committed: Composer and Strauss copy a package as it is, with nothing run
  * at install. These keep the build and the PHP that loads it in step.
  */
@@ -66,23 +66,23 @@ final class ScriptsTest extends TestCase {
 	public function test_each_screen_loads_its_build_under_its_handle(): void {
 		$this->assertStringContainsString(
 			"Assets::enqueue_built_script( Runtime::handle(), __FILE__, 'onboarding' );",
-			(string) file_get_contents( dirname( __DIR__ ) . '/src/Wizard.php' )
+			(string) file_get_contents( dirname( __DIR__ ) . '/src/Traits/Wizard/Admin.php' )
 		);
 		$this->assertStringContainsString(
 			"Assets::enqueue_built_script( Runtime::handle( 'checklist' ), __FILE__, 'checklist' );",
-			(string) file_get_contents( dirname( __DIR__ ) . '/src/Checklist.php' )
+			(string) file_get_contents( dirname( __DIR__ ) . '/src/Traits/Checklist/Display.php' )
 		);
 	}
 
 	/**
-	 * The sources ship beside the build, and nothing loads a script from
-	 * the old hand-written folder.
+	 * The sources ship beside the build, in assets/js -- src/ is PHP only --
+	 * and no PHP loads a script by a hand-written path.
 	 */
 	public function test_nothing_loads_the_old_scripts(): void {
-		$this->assertDirectoryDoesNotExist( dirname( __DIR__ ) . '/assets/js' );
+		$this->assertDirectoryDoesNotExist( dirname( __DIR__ ) . '/src/js' );
 
 		foreach ( array_keys( self::ENTRIES ) as $entry ) {
-			$this->assertFileExists( dirname( __DIR__ ) . '/src/js/' . $entry . '.js' );
+			$this->assertFileExists( dirname( __DIR__ ) . '/assets/js/' . $entry . '.js' );
 		}
 
 		foreach ( glob( dirname( __DIR__ ) . '/src/{,*/,*/*/}*.php', GLOB_BRACE ) as $file ) {

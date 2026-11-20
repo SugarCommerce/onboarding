@@ -9,7 +9,7 @@ import {
 	addAnswers,
 	fieldKey,
 	sendAnswers,
-} from '../../src/js/onboarding/answers';
+} from '../../assets/js/onboarding/answers';
 import { loadStep } from './support/wizard';
 
 /**

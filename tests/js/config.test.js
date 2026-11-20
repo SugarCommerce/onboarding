@@ -4,7 +4,7 @@
 
 import { describe, expect, test } from 'vitest';
 
-import { cardSettings, formSettings } from '../../src/js/lib/config';
+import { cardSettings, formSettings } from '../../assets/js/lib/config';
 
 const element = ( html ) => {
 	document.body.innerHTML = html;

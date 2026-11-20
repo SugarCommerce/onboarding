@@ -9,8 +9,8 @@
 
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
-import { bindChecklists, NEXT, replace } from '../../src/js/checklist/card';
-import { createPost } from '../../src/js/checklist/request';
+import { bindChecklists, NEXT, replace } from '../../assets/js/checklist/card';
+import { createPost } from '../../assets/js/checklist/request';
 import {
 	compactCard,
 	dismissedCard,

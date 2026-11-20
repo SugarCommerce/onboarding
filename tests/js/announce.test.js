@@ -4,7 +4,7 @@
 
 import { describe, expect, test } from 'vitest';
 
-import { announce } from '../../src/js/checklist/announce';
+import { announce } from '../../assets/js/checklist/announce';
 
 /**
  * A window whose next frame runs when told to.

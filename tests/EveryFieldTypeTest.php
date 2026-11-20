@@ -73,8 +73,8 @@ final class EveryFieldTypeTest extends OnboardingTestCase {
 		'repeater'        => [ [ 'one' => 'first row' ] ],
 		'flexible'        => [
 			[
-				'_layout' => 'one',
-				'one'     => 'first row',
+				'layout' => 'one',
+				'values' => [ 'one' => 'first row' ],
 			],
 		],
 		'list'            => [
@@ -104,6 +104,22 @@ final class EveryFieldTypeTest extends OnboardingTestCase {
 			'start' => '09:00',
 			'end'   => '17:00',
 		],
+		'address'         => [
+			'line1'    => '1 High St',
+			'city'     => 'Leeds',
+			'postcode' => 'LS1 1AA',
+			'country'  => 'GB',
+		],
+		'dimension'       => [
+			'value' => '12',
+			'unit'  => 'em',
+		],
+		'location'        => [
+			'address' => 'Leeds',
+			'lat'     => '53.8008',
+			'lng'     => '-1.5491',
+		],
+		'rating'          => '4',
 		'money'           => '12.50',
 		'amount_type'     => '10',
 		'license'         => 'AP-1234-5678',

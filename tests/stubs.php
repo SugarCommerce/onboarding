@@ -340,6 +340,13 @@ if ( ! function_exists( 'wp_doing_ajax' ) ) {
 	}
 }
 
+// The file URL field adds its own schemes to core's list.
+if ( ! function_exists( 'wp_allowed_protocols' ) ) {
+	function wp_allowed_protocols() {
+		return [ 'http', 'https', 'ftp', 'ftps', 'mailto', 'news', 'irc', 'irc6', 'ircs', 'gopher', 'nntp', 'feed', 'telnet', 'mms', 'rtsp', 'sms', 'svn', 'tel', 'fax', 'xmpp', 'webcal', 'urn' ];
+	}
+}
+
 if ( ! function_exists( 'esc_url' ) ) {
 	function esc_url( $url, $protocols = null, $context = 'display' ) {
 		return str_replace( '&', '&#038;', (string) $url );

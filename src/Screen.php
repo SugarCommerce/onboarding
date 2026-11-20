@@ -137,6 +137,9 @@ final class Screen {
 		// bundling a prefixed copy would agree on the name of the global and
 		// disagree about who set it. An attribute on the element the script
 		// already found belongs to that element.
+		//
+		// A plain full-page post to the wizard's own page, not REST: a step
+		// has to work with no script at all.
 		printf(
 			'<form method="post" class="onboarding__card onboarding__form" action="%s" data-step="%s" data-sync="%s" data-fields="%s">',
 			esc_url( $this->wizard->url( $key ) ),

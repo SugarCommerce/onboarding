@@ -166,9 +166,41 @@ export function fakeApi( answer ) {
 }
 
 /**
- * Let every pending promise and the next frame run.
+ * Fake the clock, the page's next frame among it.
+ *
+ * A card announces a frame after it changes (announce.js). On a real clock
+ * that frame races whatever the test waits on -- a 30 ms timeout once lost to
+ * it on a busy CI runner -- so every test that waits uses this, and settle()
+ * runs the frame itself.
+ *
+ * @return {Object} vi, as useFakeTimers() returns it.
+ */
+export const fakeClock = () =>
+	vi.useFakeTimers( {
+		toFake: [
+			'setTimeout',
+			'clearTimeout',
+			'setInterval',
+			'clearInterval',
+			'requestAnimationFrame',
+			'cancelAnimationFrame',
+			'Date',
+		],
+	} );
+
+/**
+ * Let every pending promise run, then every timer and frame it queued, and
+ * every promise those started, until nothing is left -- in order, with no
+ * real time passing.
  *
  * @return {Promise} Settled.
  */
-export const settle = () =>
-	new Promise( ( resolve ) => setTimeout( resolve, 30 ) );
+export async function settle() {
+	if ( ! vi.isFakeTimers() ) {
+		throw new Error(
+			'settle() runs a fake clock: call fakeClock() first.'
+		);
+	}
+
+	await vi.runAllTimersAsync();
+}

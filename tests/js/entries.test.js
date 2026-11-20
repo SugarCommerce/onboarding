@@ -4,9 +4,9 @@
  * apiFetch.
  */
 
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, onTestFinished, test, vi } from 'vitest';
 
-import { compactCard, ENDPOINT, load, settle } from './support/card';
+import { compactCard, ENDPOINT, fakeClock, load, settle } from './support/card';
 import { loadFinish, loadStep } from './support/wizard';
 
 const ready = vi.hoisted( () => ( { run: null } ) );
@@ -113,6 +113,8 @@ describe( 'the wizard', () => {
 describe( 'the checklist', () => {
 	test( 'binds the document at once and posts through the imported apiFetch', async () => {
 		apiFetch.mockResolvedValue( { expanded: true } );
+		fakeClock();
+		onTestFinished( () => vi.useRealTimers() );
 
 		await import( '../../assets/js/checklist.js' );
 

@@ -7,7 +7,7 @@
  * ran in Node on the old script, ported.
  */
 
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { bindChecklists, NEXT, replace } from '../../assets/js/checklist/card';
 import { createPost } from '../../assets/js/checklist/request';
@@ -16,6 +16,7 @@ import {
 	dismissedCard,
 	ENDPOINT,
 	fakeApi,
+	fakeClock,
 	fullCard,
 	load,
 	refusal,
@@ -55,10 +56,12 @@ const said = () =>
 
 beforeEach( () => {
 	document.body.innerHTML = '';
+	fakeClock();
 } );
 
 afterEach( () => {
 	unbind();
+	vi.useRealTimers();
 } );
 
 describe( 'ported from checklist-request.cjs', () => {
